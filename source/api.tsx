@@ -61,10 +61,14 @@ export default async function * api(options?: Options): AsyncGenerator<SpeedData
 		],
 		headless: true,
 	});
-	const page = await browser.newPage();
-	await page.goto('https://fast.com');
 
 	try {
+		// Chromium needs a moment to finish creating its page target on slower ARM devices.
+		await delay({seconds: 1});
+		const page = await browser.newPage();
+		await delay({seconds: 1});
+		await page.goto('https://fast.com');
+
 		for await (const result of monitorSpeed(page, options)) {
 			yield result;
 		}
