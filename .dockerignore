@@ -1,0 +1,7 @@
+.git
+.github
+node_modules
+distribution
+*.gif
+test.tsx
+yarn.lock

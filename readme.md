@@ -80,6 +80,22 @@ fast --upload --json
 }
 ```
 
+## Docker
+
+Build the image from this repository:
+
+```sh
+docker build --tag fast-cli .
+```
+
+The image entrypoint is the `fast` CLI, so pass the usual options directly to
+`docker run`. Standard shell redirection writes the CLI output to a host file:
+
+```sh
+docker run --rm fast-cli --json > result.json
+docker run --rm fast-cli --upload --single-line
+```
+
 ## Related
 
 - [speed-test](https://github.com/sindresorhus/speed-test) - Test your internet connection speed and ping using speedtest.net
