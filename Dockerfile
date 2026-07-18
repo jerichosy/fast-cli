@@ -42,9 +42,9 @@ RUN apt-get update \
 	&& rm -rf /var/lib/apt/lists/*
 
 COPY package.json tsconfig.json ./
+COPY source ./source
 RUN npm install
 
-COPY source ./source
 RUN npm run build \
 	&& npm prune --omit=dev
 
