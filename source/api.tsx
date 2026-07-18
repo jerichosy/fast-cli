@@ -63,9 +63,13 @@ export default async function * api(options?: Options): AsyncGenerator<SpeedData
 	});
 
 	try {
-		// Chromium needs a moment to finish creating its page target on slower ARM devices.
+		// Chromium needs a moment to finish creating its initial page target on slower ARM devices.
 		await delay({seconds: 1});
-		const page = await browser.newPage();
+		const [page] = await browser.pages();
+		if (!page) {
+			throw new Error('Chromium did not create an initial page.');
+		}
+
 		await delay({seconds: 1});
 		await page.goto('https://fast.com');
 
