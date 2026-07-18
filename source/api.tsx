@@ -1,6 +1,6 @@
 import {isDeepStrictEqual} from 'node:util';
 import process from 'node:process';
-import {launch, type Page} from 'puppeteer';
+import {launch, type Browser, type Page} from 'puppeteer';
 import {delay} from 'unicorn-magic';
 import {type SpeedData, type SpeedUnit} from './types.js';
 
@@ -47,6 +47,25 @@ async function * monitorSpeed(page: Page, options?: Options): AsyncGenerator<Spe
 	}
 }
 
+async function createPage(browser: Browser): Promise<Page> {
+	for (let attempt = 0; attempt < 3; attempt++) {
+		try {
+			// eslint-disable-next-line no-await-in-loop
+			return await browser.newPage();
+		} catch (error: unknown) {
+			if (attempt === 2) {
+				throw error;
+			}
+
+			// Chromium can expose its DevTools connection before a new page target is ready on ARMv7.
+			// eslint-disable-next-line no-await-in-loop
+			await delay({seconds: 1});
+		}
+	}
+
+	throw new Error('Chromium did not create a page.');
+}
+
 export default async function * api(options?: Options): AsyncGenerator<SpeedData, void, undefined> {
 	const browser = await launch({
 		executablePath: process.env['PUPPETEER_EXECUTABLE_PATH'],
@@ -63,14 +82,9 @@ export default async function * api(options?: Options): AsyncGenerator<SpeedData
 	});
 
 	try {
-		// Chromium needs a moment to finish creating its initial page target on slower ARM devices.
+		// Chromium needs a moment to finish creating page targets on slower ARM devices.
 		await delay({seconds: 1});
-		const [page] = await browser.pages();
-		if (!page) {
-			throw new Error('Chromium did not create an initial page.');
-		}
-
-		await delay({seconds: 1});
+		const page = await createPage(browser);
 		await page.goto('https://fast.com');
 
 		for await (const result of monitorSpeed(page, options)) {
