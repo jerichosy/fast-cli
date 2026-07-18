@@ -50,7 +50,15 @@ async function * monitorSpeed(page: Page, options?: Options): AsyncGenerator<Spe
 export default async function * api(options?: Options): AsyncGenerator<SpeedData, void, undefined> {
 	const browser = await launch({
 		executablePath: process.env['PUPPETEER_EXECUTABLE_PATH'],
-		args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', '--ignore-certificate-errors'],
+		args: [
+			'--no-sandbox',
+			'--disable-setuid-sandbox',
+			'--disable-dev-shm-usage',
+			'--disable-gpu',
+			'--no-zygote',
+			'--single-process',
+			'--ignore-certificate-errors',
+		],
 		headless: true,
 	});
 	const page = await browser.newPage();
